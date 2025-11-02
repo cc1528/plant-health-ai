@@ -15,3 +15,31 @@ A FastAPI endpoint (POST /predict) returning JSON, structured for integration in
 Added user-facing messaging about limitations: performance can degrade in real garden photos (natural lighting, background clutter). Proposed collecting in-the-wild images and fine-tuning as next step.
 
 Goal: early detection of crop disease to reduce pesticide overuse and limit crop loss.
+
+*Repository Structure*
+
+plant-health-ai/
+├─ data/
+│  ├─ tmp/              # Kaggle raw download (auto-created)
+│  ├─ raw/              # class folders normalized
+│  └─ splits/           # train/val/test for model
+│      ├─ train/
+│      ├─ val/
+│      └─ test/
+├─ models/
+│  ├─ model_best.pth    # created after training
+│  └─ model_final.pth   # optional
+├─ src/
+│  ├─ download_and_prepare.py
+│  ├─ train.py
+│  ├─ inference.py      # optional CLI tester, not strictly needed for recruiters now
+│  └─ utils.py          # helper functions (optional if you're already using it)
+├─ app/
+│  └─ app.py            # Streamlit user-facing demo
+├─ api/
+│  └─ app.py            # FastAPI inference service (JSON API)
+├─ notebooks/
+│  └─ evaluation.ipynb  # ( confusion matrix *)
+├─ environment.yml
+├─ README.md
+└─ .gitignore
