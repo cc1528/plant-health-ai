@@ -1,4 +1,4 @@
-Project: Tomato Leaf Health Diagnostics (Computer Vision)
+**Project: Tomato Leaf Health Diagnostics (Computer Vision)**
 
 Built an end-to-end plant health assistant for tomato leaves using the PlantVillage dataset (healthy / early blight / late blight).
 
