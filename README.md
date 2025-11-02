@@ -16,8 +16,9 @@ Added user-facing messaging about limitations: performance can degrade in real g
 
 Goal: early detection of crop disease to reduce pesticide overuse and limit crop loss.
 
-*Repository Structure*
+## Repository Structure
 
+```text
 plant-health-ai/
 ├─ data/
 │  ├─ tmp/              # Kaggle raw download (auto-created)
@@ -39,7 +40,7 @@ plant-health-ai/
 ├─ api/
 │  └─ app.py            # FastAPI inference service (JSON API)
 ├─ notebooks/
-│  └─ evaluation.ipynb  # ( confusion matrix *)
+│  └─ evaluation.ipynb  # (confusion matrix *)
 ├─ environment.yml
 ├─ README.md
 └─ .gitignore
