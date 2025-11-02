@@ -1,0 +1,1 @@
+I fine-tuned only the classification head of a pretrained ResNet18 to classify three tomato leaf health states (healthy, early blight, late blight). I used transfer learning and froze the backbone to avoid overfitting on a relatively small dataset (~2.5k training images).
