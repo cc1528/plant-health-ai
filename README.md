@@ -77,7 +77,11 @@ plant-health-ai/
 ├─ README.md
 └─ .gitignore
 
-## Setup and Run
+## ⚙️ Setup and Run
+
+To run the app locally, follow these steps:
+
+```bash
 # clone repository
 git clone https://github.com/cc1528/plant-health-ai.git
 cd plant-health-ai
