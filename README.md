@@ -77,6 +77,8 @@ plant-health-ai/
 ├─ README.md
 └─ .gitignore
 
+---
+
 ## ⚙️ Setup and Run
 
 To run the app locally, follow these steps:
