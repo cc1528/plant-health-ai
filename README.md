@@ -13,8 +13,8 @@ The model detects **early blight**, **late blight**, or **healthy** leaves using
 - **Compute:** Trained on GPU via **Snellius HPC (SURF NL)**.  
 - **Pipeline:** Automated dataset download, label normalization, and deterministic train/val/test splits.  
 - **Deployment:**  
-  - 🖥️ **Streamlit Web App** — upload a leaf image, get diagnosis, confidence, and care advice.  
-  - ⚙️ **FastAPI Endpoint** (`POST /predict`) — returns JSON predictions for integration into other systems.  
+  - 🖥️ **Streamlit Web App**, upload a leaf image, get diagnosis, confidence, and care advice.  
+  - ⚙️ **FastAPI Endpoint** (`POST /predict`), returns JSON predictions for integration into other systems.  
 
 ---
 
