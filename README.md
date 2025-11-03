@@ -48,6 +48,27 @@ The app displays class probabilities, confidence score, and actionable plant car
 
 ---
 
+## ⚙️ Setup and Run
+
+To run the app locally, follow these steps:
+
+```bash
+# clone repository
+git clone https://github.com/cc1528/plant-health-ai.git
+cd plant-health-ai
+
+# create environment
+conda env create -f environment.yml
+conda activate plant-health-ai
+
+# run Streamlit app
+streamlit run app/app.py
+
+# or launch API endpoint
+uvicorn api.app:app --reload --port 8080
+
+---
+
 ## 🧩 Repository Structure
 
 ```text
@@ -77,24 +98,4 @@ plant-health-ai/
 ├─ README.md
 └─ .gitignore
 
----
-
-## ⚙️ Setup and Run
-
-To run the app locally, follow these steps:
-
-```bash
-# clone repository
-git clone https://github.com/cc1528/plant-health-ai.git
-cd plant-health-ai
-
-# create environment
-conda env create -f environment.yml
-conda activate plant-health-ai
-
-# run Streamlit app
-streamlit run app/app.py
-
-# or launch API endpoint
-uvicorn api.app:app --reload --port 8080
 
