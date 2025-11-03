@@ -1,0 +1,38 @@
+# Ignore dataset and model outputs
+data/
+models/
+
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Model checkpoints and weights
+*.pth
+*.pt
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Environment and dependency files
+.env
+.venv/
+env/
+venv/
+
+# Streamlit & FastAPI temporary files
+.streamlit/
+logs/
+*.log
+
+# OS / IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Optional: large archive files
+*.zip
+*.tar
+*.gz

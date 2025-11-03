@@ -11,22 +11,26 @@ from typing import Dict, List, Tuple
 
 # Kaggle dataset slug (from Kaggle)
 KAGGLE_DATASET = "charuchaudhry/plantvillage-tomato-leaf-dataset"
-# Source: PlantVillage tomato leaf dataset with classes like
-# Tomato___healthy, Tomato___Early_blight, Tomato___Late_blight. :contentReference[oaicite:2]{index=2}
+# We'll download it once, and then reuse what's already in data/tmp.
 
 # Project root assumed: script is in plant-health-ai/src/
 ROOT = Path(__file__).resolve().parents[1]
 
-DATA_DIR = ROOT / "data"
-TMP_DIR = DATA_DIR / "tmp"        # temporary download/unzip area
-RAW_DIR = DATA_DIR / "raw"        # normalized class folders will end up here
-SPLITS_DIR = DATA_DIR / "splits"  # train/val/test
+DATA_DIR   = ROOT / "data"
+TMP_DIR    = DATA_DIR / "tmp"          # where Kaggle unzips
+RAW_DIR    = DATA_DIR / "raw"          # cleaned class folders go here
+SPLITS_DIR = DATA_DIR / "splits"       # final train/val/test split
 
 TRAIN_DIR = SPLITS_DIR / "train"
 VAL_DIR   = SPLITS_DIR / "val"
 TEST_DIR  = SPLITS_DIR / "test"
 
-# class name mapping from original folder name to our clean label
+# IMPORTANT: in your case the images live under:
+# data/tmp/plantvillage/plantvillage/<class_name>/
+# So we point here:
+PLANT_ROOT = TMP_DIR / "plantvillage" / "plantvillage"
+
+# We only keep 3 classes for now
 CLASS_NAME_MAP: Dict[str, str] = {
     "Tomato___healthy": "healthy",
     "Tomato___Early_blight": "early_blight",
@@ -51,18 +55,11 @@ def ensure_dir(path: Path):
 def run_kaggle_download():
     """
     Uses kaggle CLI to download + unzip the dataset into data/tmp.
-    Requires:
-    - kaggle.json in ~/.kaggle
-    - `pip install kaggle`
+    If you've already downloaded it manually, you can skip calling this.
     """
-
     ensure_dir(TMP_DIR)
 
     print(f"[INFO] Downloading dataset {KAGGLE_DATASET} into {TMP_DIR} ...")
-    # call kaggle CLI
-    # -d dataset slug
-    # -p download path
-    # --unzip to extract
     cmd = [
         "kaggle", "datasets", "download",
         "-d", KAGGLE_DATASET,
@@ -73,26 +70,43 @@ def run_kaggle_download():
     print("[INFO] Kaggle download + unzip completed.")
 
 
-def collect_original_class_dirs(base_dir: Path) -> Dict[str, Path]:
+def list_images(folder: Path) -> List[Path]:
+    imgs = []
+    for fname in folder.iterdir():
+        low = fname.name.lower()
+        if low.endswith(".jpg") or low.endswith(".jpeg") or low.endswith(".png"):
+            imgs.append(fname)
+    return imgs
+
+
+def collect_original_class_dirs() -> Dict[str, Path]:
     """
-    Find folders in tmp that match the PlantVillage naming and map them.
-    Returns dict original_class_name -> path
+    Look inside PLANT_ROOT and return only the class folders we care about.
+    e.g. { "Tomato___healthy": Path(.../Tomato___healthy), ... }
     """
-    mapping = {}
-    for item in base_dir.iterdir():
+    mapping: Dict[str, Path] = {}
+
+    # sanity check
+    if not PLANT_ROOT.exists():
+        raise RuntimeError(
+            f"Expected {PLANT_ROOT} to exist, but it doesn't. "
+            "Check unzip path / folder nesting."
+        )
+
+    for item in PLANT_ROOT.iterdir():
         if item.is_dir() and item.name in CLASS_NAME_MAP:
             mapping[item.name] = item
+
     return mapping
 
 
 def normalize_raw_folders(class_dirs: Dict[str, Path]):
     """
-    Copy images from tmp/<original_class> into data/raw/<clean_label>.
-
+    Copy images from PLANT_ROOT/<original_class> into data/raw/<clean_label>/.
     After this:
-    data/raw/healthy/*.jpg
-    data/raw/early_blight/*.jpg
-    data/raw/late_blight/*.jpg
+      data/raw/healthy/*.jpg
+      data/raw/early_blight/*.jpg
+      data/raw/late_blight/*.jpg
     """
     print("[INFO] Normalizing raw class folders into data/raw/")
     ensure_dir(RAW_DIR)
@@ -112,15 +126,6 @@ def normalize_raw_folders(class_dirs: Dict[str, Path]):
     print("[INFO] Normalization complete.")
 
 
-def list_images(folder: Path) -> List[Path]:
-    imgs = []
-    for fname in folder.iterdir():
-        low = fname.name.lower()
-        if low.endswith(".jpg") or low.endswith(".jpeg") or low.endswith(".png"):
-            imgs.append(fname)
-    return imgs
-
-
 def split_list(
     items: List[Path],
     train_ratio: float,
@@ -136,7 +141,7 @@ def split_list(
     n = len(shuffled)
     n_train = int(n * train_ratio)
     n_val   = int(n * val_ratio)
-    # rest to test
+    # leftover goes to test
     n_test  = n - n_train - n_val
 
     train_files = shuffled[:n_train]
@@ -160,10 +165,10 @@ def copy_split(files: List[Path], split_root: Path, class_label: str):
 
 def build_splits():
     """
-    Takes data/raw/<class_label> and creates:
-    data/splits/train/<class_label>/
-    data/splits/val/<class_label>/
-    data/splits/test/<class_label>/
+    Take data/raw/<class_label> and create:
+      data/splits/train/<class_label>/
+      data/splits/val/<class_label>/
+      data/splits/test/<class_label>/
     """
     print("[INFO] Creating train/val/test splits ...")
 
@@ -173,7 +178,6 @@ def build_splits():
 
     summary = []
 
-    # for each clean class label (healthy, early_blight, late_blight)
     for class_label in CLASS_NAME_MAP.values():
         class_raw_dir = RAW_DIR / class_label
         imgs = list_images(class_raw_dir)
@@ -222,24 +226,29 @@ def main():
     ensure_dir(RAW_DIR)
     ensure_dir(SPLITS_DIR)
 
-    print("=== STEP 2: download + unzip from Kaggle ===")
-    run_kaggle_download()
+    # If you've already downloaded once, you can comment out the next 2 lines.
+    # Otherwise leave them so first-time users also get the data.
+    print("=== STEP 2: download + unzip from Kaggle (if not already downloaded) ===")
+    if not PLANT_ROOT.exists():
+        run_kaggle_download()
+    else:
+        print("[INFO] Dataset already present, skipping download.")
 
     print("=== STEP 3: collect tomato folders from tmp ===")
-    class_dirs = collect_original_class_dirs(TMP_DIR)
+    class_dirs = collect_original_class_dirs()
     if not class_dirs:
         raise RuntimeError(
-            "Did not find expected tomato class folders in tmp. "
-            "Check that the Kaggle dataset downloaded correctly."
+            "Did not find expected tomato class folders in tmp/plantvillage/plantvillage. "
+            "Check CLASS_NAME_MAP or folder nesting."
         )
 
-    print("=== STEP 4: normalize to data/raw/ (healthy / early_blight / late_blight) ===")
+    print("=== STEP 4: normalize into data/raw/ (healthy / early_blight / late_blight) ===")
     normalize_raw_folders(class_dirs)
 
-    print("=== STEP 5: split into train / val / test under data/splits ===")
+    print("=== STEP 5: make train / val / test ===")
     build_splits()
 
-    print("\nAll done. You can now train using data/splits/train, val, test")
+    print("\nAll done. You can now train using data/splits/train, val, test ✅")
 
 
 if __name__ == "__main__":
