@@ -1,46 +1,78 @@
-**Project: Tomato Leaf Health Diagnostics (Computer Vision)**
+# 🍅 Project: Tomato Leaf Health Diagnostics (Computer Vision)
 
-Built an end-to-end plant health assistant for tomato leaves using the PlantVillage dataset (healthy / early blight / late blight).
+An end-to-end **plant health assistant** for tomato leaves built with **PyTorch**, **FastAPI**, and **Streamlit**.  
+The model detects **early blight**, **late blight**, or **healthy** leaves using the [PlantVillage dataset](https://www.kaggle.com/datasets/charuchaudhry/plantvillage-tomato-leaf-dataset).
 
-Designed a reproducible data pipeline: automatic download, label normalization, and deterministic train/val/test splits.
+---
 
-Trained a ResNet18-based classifier (PyTorch) on GPU (Snellius HPC). Achieved ~96% test accuracy on held-out data.
+## 🌿 Overview
 
-Exposed the model in two ways:
+- **Goal:** Early detection of crop disease to reduce pesticide overuse and limit crop loss.  
+- **Model:** Fine-tuned **ResNet18** achieving ~96% test accuracy.  
+- **Dataset:** Balanced 3-class subset (Healthy / Early Blight / Late Blight).  
+- **Compute:** Trained on GPU via **Snellius HPC (SURF NL)**.  
+- **Pipeline:** Automated dataset download, label normalization, and deterministic train/val/test splits.  
+- **Deployment:**  
+  - 🖥️ **Streamlit Web App** — upload a leaf image, get diagnosis, confidence, and care advice.  
+  - ⚙️ **FastAPI Endpoint** (`POST /predict`) — returns JSON predictions for integration into other systems.  
 
-A Streamlit web app where users upload a leaf photo and get a diagnosis, confidence score, and care advice (“healthy” vs “needs attention”).
+---
 
-A FastAPI endpoint (POST /predict) returning JSON, structured for integration into other systems (e.g. mobile app or dashboard).
+## 🧠 Model Architecture
 
-Added user-facing messaging about limitations: performance can degrade in real garden photos (natural lighting, background clutter). Proposed collecting in-the-wild images and fine-tuning as next step.
+| Component | Description |
+|------------|-------------|
+| **Base** | ResNet18 pretrained on ImageNet |
+| **Training** | Cross-entropy loss, Adam optimizer |
+| **Accuracy** | ~96% test accuracy |
+| **Input size** | 256×256 RGB |
+| **Output classes** | `healthy`, `early_blight`, `late_blight` |
 
-Goal: early detection of crop disease to reduce pesticide overuse and limit crop loss.
+---
 
-## Repository Structure
+## 💡 Web App Demo
+
+### 🌱 Landing Page & Upload Interface
+Users upload a single tomato leaf photo and receive instant AI feedback on its health condition.
+
+<img src="assets/ui_clean.png" width="900"/>
+
+---
+
+### 🍅 Example Prediction: Early Blight Detected
+The app displays class probabilities, confidence score, and actionable plant care tips.
+
+<img src="assets/ui_prediction.png" width="900"/>
+
+> _Built with Streamlit · Local inference for privacy · Soft green UI inspired by plant life._
+
+---
+
+## 🧩 Repository Structure
 
 ```text
 plant-health-ai/
 ├─ data/
 │  ├─ tmp/              # Kaggle raw download (auto-created)
-│  ├─ raw/              # class folders normalized
-│  └─ splits/           # train/val/test for model
+│  ├─ raw/              # normalized dataset folders
+│  └─ splits/           # deterministic train/val/test
 │      ├─ train/
 │      ├─ val/
 │      └─ test/
 ├─ models/
-│  ├─ model_best.pth    # created after training
+│  ├─ model_best.pth    # trained checkpoint
 │  └─ model_final.pth   # optional
 ├─ src/
-│  ├─ download_and_prepare.py
-│  ├─ train.py
-│  ├─ inference.py      # optional CLI tester, not strictly needed for recruiters now
-│  └─ utils.py          # helper functions (optional if you're already using it)
+│  ├─ download_and_prepare.py  # data pipeline automation
+│  ├─ train.py                 # training script
+│  ├─ inference.py             # CLI testing (optional)
+│  └─ utils.py                 # helper functions
 ├─ app/
-│  └─ app.py            # Streamlit user-facing demo
+│  └─ app.py            # Streamlit web interface
 ├─ api/
-│  └─ app.py            # FastAPI inference service (JSON API)
+│  └─ app.py            # FastAPI endpoint (JSON inference)
 ├─ notebooks/
-│  └─ evaluation.ipynb  # (confusion matrix *)
+│  └─ evaluation.ipynb  # performance metrics & confusion matrix
 ├─ environment.yml
 ├─ README.md
 └─ .gitignore
