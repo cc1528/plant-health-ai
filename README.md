@@ -76,3 +76,19 @@ plant-health-ai/
 ├─ environment.yml
 ├─ README.md
 └─ .gitignore
+
+## Setup and Run
+# clone repository
+git clone https://github.com/cc1528/plant-health-ai.git
+cd plant-health-ai
+
+# create environment
+conda env create -f environment.yml
+conda activate plant-health-ai
+
+# run Streamlit app
+streamlit run app/app.py
+
+# or launch API endpoint
+uvicorn api.app:app --reload --port 8080
+
